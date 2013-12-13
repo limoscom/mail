@@ -100,14 +100,16 @@ module Mail
       smtp = Net::SMTP.new(settings[:address], settings[:port])
       if settings[:tls] || settings[:ssl]
         if smtp.respond_to?(:enable_tls)
-          smtp.enable_tls(ssl_context)
+          ctx = ssl_context
+          ctx ? smtp.enable_tls(ctx) : smtp.enable_tls
         end
       elsif settings[:enable_starttls_auto]
         if smtp.respond_to?(:enable_starttls_auto)
-          smtp.enable_starttls_auto(ssl_context)
+          ctx = ssl_context
+          ctx ? smtp.enable_starttls_auto(ctx) : smtp.enable_starttls_auto
         end
       end
-
+      
       response = nil
       smtp.start(settings[:domain], settings[:user_name], settings[:password], settings[:authentication]) do |smtp_obj|
         response = smtp_obj.sendmail(message, smtp_from, smtp_to)
